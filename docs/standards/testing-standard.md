@@ -7,9 +7,11 @@
 - **Detect, don't impose.** Inspect existing test projects for the framework in use
   (xUnit, NUnit, MSTest) and the mocking library (Moq, NSubstitute, FakeItEasy) and
   the assertion style (FluentAssertions vs. built-in). Match what exists.
-- If **no** test project exists, default to **xUnit + NSubstitute + FluentAssertions**
-  and create a sibling test project named `<Project>.Tests` (test project only — this
-  is permitted; it is not business code).
+- If **no** test project exists, default to **xUnit + Moq + Microsoft.NET.Test.Sdk**
+  (plus `xunit.runner.visualstudio` and `coverlet.collector` so the project runs and
+  reports coverage), using xUnit's built-in `Assert` for assertions. Create a sibling
+  test project named `<Project>.Tests` (test project only — this is permitted; it is not
+  business code). See the `unit-test-generator` skill for the full csproj template.
 
 ## Structure & naming
 
@@ -17,7 +19,8 @@
 - Test method name: `Method_Scenario_ExpectedOutcome`
   (e.g., `Handle_WhenOrderMissing_ThrowsNotFoundException`).
 - Follow **Arrange–Act–Assert**, with the three sections visually separated.
-- Prefer one logical assertion per test; group related assertions with FluentAssertions.
+- Prefer one logical assertion per test; group related assertions that verify a single
+  outcome (e.g. result type + status) using xUnit `Assert`.
 
 ## Coverage expectations
 
