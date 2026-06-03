@@ -1,0 +1,25 @@
+{
+  "_comment": "Example LOCAL developer MCP profile. Enables only credential-free + locally-authenticated servers for fast onboarding. Copy relevant entries into your real .mcp.json (root) and set env vars via .mcp/configurations/.env. Azure here uses your `az login` / DefaultAzureCredential instead of a client secret.",
+  "mcpServers": {
+    "code-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "${WORKSPACE_ROOT}"],
+      "env": {}
+    },
+    "documentation-search": {
+      "command": "npx",
+      "args": ["-y", "@microsoft/mcp-server-learn"],
+      "env": {}
+    },
+    "dependency-scanning": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-osv"],
+      "env": {}
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}" }
+    }
+  }
+}

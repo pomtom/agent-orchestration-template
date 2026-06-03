@@ -1,0 +1,11 @@
+# MCP local credentials — NEVER commit real secrets.
+.mcp/configurations/.env
+.env
+
+# Common .NET artifacts (safe defaults for host repos)
+bin/
+obj/
+*.user
+
+# Local Functions settings (may contain secrets)
+local.settings.json

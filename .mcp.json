@@ -1,0 +1,77 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/mcp.json",
+  "_comment": "Repository-agnostic MCP configuration for the Claude Code agentic framework. All credentials are env-var placeholders — set them in your environment or via .mcp/configurations/.env (never commit real secrets). See .mcp/servers/*.md for per-server setup. Comment out any server you are not using; servers needing credentials will fail to start until their env vars are set.",
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
+      }
+    },
+    "code-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${WORKSPACE_ROOT}"
+      ],
+      "env": {}
+    },
+    "azure": {
+      "command": "npx",
+      "args": ["-y", "@azure/mcp@latest", "server", "start"],
+      "env": {
+        "AZURE_TENANT_ID": "${AZURE_TENANT_ID}",
+        "AZURE_CLIENT_ID": "${AZURE_CLIENT_ID}",
+        "AZURE_CLIENT_SECRET": "${AZURE_CLIENT_SECRET}",
+        "AZURE_SUBSCRIPTION_ID": "${AZURE_SUBSCRIPTION_ID}"
+      }
+    },
+    "application-insights": {
+      "command": "npx",
+      "args": ["-y", "@azure/mcp@latest", "server", "start", "--namespace", "monitor"],
+      "env": {
+        "AZURE_TENANT_ID": "${AZURE_TENANT_ID}",
+        "AZURE_CLIENT_ID": "${AZURE_CLIENT_ID}",
+        "AZURE_CLIENT_SECRET": "${AZURE_CLIENT_SECRET}",
+        "AZURE_SUBSCRIPTION_ID": "${AZURE_SUBSCRIPTION_ID}",
+        "APPLICATIONINSIGHTS_RESOURCE_ID": "${APPLICATIONINSIGHTS_RESOURCE_ID}"
+      }
+    },
+    "documentation-search": {
+      "command": "npx",
+      "args": ["-y", "@microsoft/mcp-server-learn"],
+      "env": {
+        "_note": "Microsoft Learn docs search. If unavailable in your registry, swap for an equivalent docs-search server (e.g. context7) in .mcp/configurations/."
+      }
+    },
+    "architecture-analysis": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${WORKSPACE_ROOT}/src",
+        "${WORKSPACE_ROOT}/docs/architecture"
+      ],
+      "env": {
+        "_note": "Filesystem-backed analysis surface scoped to source + architecture docs. Used by the architecture-reviewer to read code/diagrams. Adjust the paths to your repo layout."
+      }
+    },
+    "dependency-scanning": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-osv"],
+      "env": {
+        "_note": "Software-composition analysis via the OSV vulnerability database. If unavailable, substitute another SCA MCP server. Pair with `dotnet list package --vulnerable` in CI."
+      }
+    },
+    "security-scanning": {
+      "command": "npx",
+      "args": ["-y", "@aikido/mcp-server"],
+      "env": {
+        "AIKIDO_API_TOKEN": "${SECURITY_SCANNER_TOKEN}",
+        "_note": "SAST/secret/dependency scanning. Replace with your organization's security MCP server (Snyk, Trivy, Defender, etc.) and matching token env var."
+      }
+    }
+  }
+}

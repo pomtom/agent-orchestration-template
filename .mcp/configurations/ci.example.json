@@ -1,0 +1,20 @@
+{
+  "_comment": "Example CI MCP profile. In CI, inject all secrets from the pipeline's secret store as environment variables — never from a committed .env. Keep the surface minimal: scanning + read-only GitHub. Disable interactive/local-only servers.",
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}" }
+    },
+    "dependency-scanning": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-osv"],
+      "env": {}
+    },
+    "security-scanning": {
+      "command": "npx",
+      "args": ["-y", "@aikido/mcp-server"],
+      "env": { "AIKIDO_API_TOKEN": "${SECURITY_SCANNER_TOKEN}" }
+    }
+  }
+}

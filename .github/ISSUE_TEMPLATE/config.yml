@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Engineering standards
+    url: ../../docs/standards/
+    about: Canonical standards this repository enforces (read before filing).
+  - name: Framework overview
+    url: ../../docs/architecture/framework-overview.md
+    about: How the Claude Code + Copilot automation framework fits together.

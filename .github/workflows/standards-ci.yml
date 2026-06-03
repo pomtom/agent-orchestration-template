@@ -1,0 +1,85 @@
+# Standards CI
+#
+# Drop-in-safe engineering-standards checks for any .NET solution.
+# It is OPT-IN: it only runs when manually dispatched or when you enable the push/PR
+# triggers below. This prevents the framework from breaking a host repo the moment it
+# is added. To activate continuous checks, uncomment the `push`/`pull_request` triggers.
+#
+# Standards enforced here mirror docs/standards/* (async, packages, formatting, build,
+# tests). Deeper semantic checks are performed by the Claude Code skills/agents.
+
+name: Standards CI
+
+on:
+  workflow_dispatch: {}
+  # Uncomment to enable on every PR / push to main:
+  # pull_request:
+  #   branches: [ main ]
+  # push:
+  #   branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          # Adjust or use a global.json in the repo to pin the SDK.
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+  standards-check:
+    name: Standards Check
+    runs-on: ubuntu-latest
+    # Non-blocking by default so the framework never breaks an unprepared repo.
+    # Remove this line once the repo is compliant to make violations fail the build.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Format check (whitespace, style, analyzers)
+        run: dotnet format --verify-no-changes --severity warn
+
+      - name: Vulnerable packages (blocking when enforced)
+        shell: bash
+        run: |
+          echo "Scanning for vulnerable packages..."
+          output=$(dotnet list package --vulnerable --include-transitive 2>&1)
+          echo "$output"
+          if echo "$output" | grep -q "has the following vulnerable packages"; then
+            echo "::error::Vulnerable packages detected. See docs/standards/package-governance-standard.md"
+            exit 1
+          fi
+
+      - name: Deprecated packages (report only)
+        run: dotnet list package --deprecated || true
+
+      - name: Outdated packages (report only)
+        run: dotnet list package --outdated --include-transitive || true
