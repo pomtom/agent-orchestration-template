@@ -23,9 +23,10 @@ Centralize and harden dependency management across the solution.
 4. **Report** an inventory + findings grouped as **Vulnerable (blocking)**,
    **Deprecated**, **Outdated**, **Unused**, **Not centralized**, each with concrete
    `Directory.Packages.props`/`.csproj` edits and CLI remediation.
-5. **Offer to apply**: create/normalize `Directory.Packages.props` &
+5. **Apply directly**: create/normalize `Directory.Packages.props` &
    `Directory.Build.props`, strip inline versions, remove unused refs, and bump
-   versions (flagging major upgrades as potentially breaking).
+   versions. Confirm first only for major-version upgrades (potentially breaking). Do not
+   stop at a list of suggestions.
 
 ## Guardrails
 

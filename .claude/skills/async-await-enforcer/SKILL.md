@@ -21,8 +21,9 @@ asynchronous, non-blocking alternatives.
    non-determinism.
 3. **Report** each as `file:line`, offending pattern, recommended fix, and severity
    (deadlock-risk = error).
-4. **Offer to apply** mechanical fixes; flag any change that alters a public signature
-   or could cascade through callers (async-all-the-way ripple).
+4. **Apply** the mechanical fixes directly (edit the files); flag any change that alters a
+   public signature or cascades through callers (async-all-the-way ripple) and confirm
+   before applying those. Do not stop at a list of suggestions.
 
 ## Guardrails
 

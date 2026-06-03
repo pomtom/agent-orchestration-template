@@ -20,8 +20,9 @@ Move configuration to strongly-typed, validated options bound at startup.
 3. **Report** `file:line`, the issue, the proposed `<Area>Options` class, and the
    `AddOptions<T>().Bind(...).ValidateDataAnnotations().ValidateOnStart()` registration.
 4. **Flag committed secrets as high severity** and recommend User Secrets / Key Vault.
-5. **Offer to apply**: create options classes, replace raw accesses with `IOptions<T>`,
-   and add validation registrations.
+5. **Apply directly**: create the options classes, replace raw accesses with `IOptions<T>`,
+   and add the validation registrations. Do not stop at a list of suggestions; confirm
+   first only for behavior-changing edits.
 
 ## Guardrails
 

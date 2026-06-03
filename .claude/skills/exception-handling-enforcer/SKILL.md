@@ -23,8 +23,9 @@ Drive exception handling toward a centralized, meaningful, observable model.
    the correlation ID (see
    [correlation-id-standard](../../../docs/standards/correlation-id-standard.md) and
    [logging-standard](../../../docs/standards/logging-standard.md)).
-5. **Offer to apply** the centralized handler + mechanical fixes (`throw ex;`→`throw;`,
-   removing empty catches).
+5. **Apply** the centralized handler + mechanical fixes directly (`throw ex;`→`throw;`,
+   remove empty catches, introduce domain exceptions). Do not stop at a list of
+   suggestions; confirm first only for behavior-changing edits.
 
 ## Guardrails
 

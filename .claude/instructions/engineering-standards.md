@@ -32,8 +32,12 @@ first** — every other standard adapts to the detected project type.
   projects, Web APIs, Function Apps, Web Apps, or sample/business code, and does not
   generate business code unless explicitly requested. (Creating a missing **test**
   project is the only permitted exception, per the testing standard.)
-- Enforcer skills propose changes with `file:line` evidence and apply only mechanical,
-  behavior-preserving fixes by default; breaking changes are flagged for approval.
+- **Enforcer skills apply fixes by default — they are action-first, not advisory.** They
+  edit the files directly for mechanical, behavior-preserving changes (recording
+  `file:line` evidence in the report). Only **breaking** changes (public API / serialized
+  contract renames, major version bumps, behavior changes) are paused for approval before
+  applying. Ending with a summary of what *could* change, without changing it, is
+  incomplete.
 - Never introduce secrets into source; configuration secrets belong in User Secrets /
   Key Vault / App Settings.
 - **Build gate.** Any step that modifies code must rebuild afterward per

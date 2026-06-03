@@ -20,8 +20,9 @@ guidelines.
 4. **Separate breaking renames.** List renames that cross public API boundaries
    (public types/members, DI registrations, serialized DTO property names, route
    names) under a **Breaking** heading — these need explicit approval.
-5. **Offer to apply** non-breaking renames; for breaking ones, apply only on request and
-   update all references.
+5. **Apply** non-breaking renames directly (update all references); for breaking ones
+   (public types/members, serialized contracts, routes) confirm first, then apply and
+   update all references. Do not stop at a list of suggestions.
 
 ## Guardrails
 

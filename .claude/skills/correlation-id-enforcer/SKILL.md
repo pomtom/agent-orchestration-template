@@ -18,7 +18,7 @@ Establish a single correlation ID per request and propagate it everywhere.
    IDs generated per flow, and IDs missing from error responses/telemetry.
 3. **Report** each entry point and propagation gap, with the building block to add for
    the detected host type.
-4. **Propose / apply building blocks**: `CorrelationIdMiddleware` or
+4. **Apply the building blocks** directly (do not stop at suggestions): `CorrelationIdMiddleware` or
    `IFunctionsWorkerMiddleware`, a `CorrelationIdDelegatingHandler` on
    `IHttpClientFactory` clients, message-property stamping for queues/Service Bus, the
    logging scope (see [logging-standard](../../../docs/standards/logging-standard.md)),

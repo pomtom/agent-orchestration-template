@@ -28,7 +28,9 @@ Drive logging toward structured, leveled, correlated, and secret-safe.
    App Insights registration for detected Azure types, with both surfaced as custom
    dimensions via the scope and/or an `ITelemetryInitializer`; and source-generated
    logging for hot paths.
-5. **Offer to apply** mechanical fixes (interpolation→templates, add exception arg).
+5. **Apply** the mechanical fixes directly (interpolation→templates, add exception arg,
+   add the `CorrelationId`+`InstanceId` scope). Do not stop at a list of suggestions;
+   confirm first only for behavior-changing edits.
 
 ## Guardrails
 

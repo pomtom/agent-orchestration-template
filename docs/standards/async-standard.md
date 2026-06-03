@@ -49,4 +49,5 @@
 
 - Report each violation as: file:line, the offending pattern, the recommended fix, and
   severity (error for deadlock-risk `.Result`/`.Wait()`, warning for missing token).
-- Offer to apply mechanical fixes; flag any change that alters a public signature.
+- Apply mechanical fixes directly; confirm first for any change that alters a public
+  signature or ripples through callers.
