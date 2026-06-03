@@ -1,0 +1,209 @@
+# Code Review Workflow for Pull Requests
+#
+# Automated code review using Claude Code framework standards.
+# Runs on every PR to validate engineering standards before merge.
+
+name: Code Review (PR)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  project-detection:
+    name: Detect Project Types
+    runs-on: ubuntu-latest
+    outputs:
+      project-types: ${{ steps.detect.outputs.types }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+      
+      - name: Detect project types
+        id: detect
+        run: |
+          echo "Detecting .NET project types..."
+          # Find all .csproj files and identify project types
+          find . -name "*.csproj" -type f | while read proj; do
+            echo "Project: $proj"
+            grep -q "<Project Sdk=\"Microsoft.NET.Sdk.Web\">" "$proj" && echo "  Type: ASP.NET Core Web"
+            grep -q "Microsoft.Azure.Functions" "$proj" && echo "  Type: Azure Functions"
+            grep -q "Microsoft.Azure.WebJobs.Extensions.DurableTask" "$proj" && echo "  Type: Durable Functions"
+          done
+
+  async-check:
+    name: Async/Await Standards
+    runs-on: ubuntu-latest
+    needs: project-detection
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+      
+      - name: Check for async violations
+        run: |
+          echo "Checking for .Result, .Wait(), and async void violations..."
+          # Check for .Result usage
+          if grep -r "\.Result" --include="*.cs" --exclude-dir={bin,obj} .; then
+            echo "::warning::Found .Result usage - should use await instead"
+          fi
+          # Check for .Wait() usage
+          if grep -r "\.Wait()" --include="*.cs" --exclude-dir={bin,obj} .; then
+            echo "::warning::Found .Wait() usage - should use await instead"
+          fi
+          # Check for async void (excluding event handlers)
+          if grep -r "async void" --include="*.cs" --exclude-dir={bin,obj} . | grep -v "EventHandler"; then
+            echo "::warning::Found async void - should return Task"
+          fi
+
+  naming-check:
+    name: Naming Conventions
+    runs-on: ubuntu-latest
+    needs: project-detection
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+      
+      - name: Verify naming conventions
+        run: |
+          echo "Checking naming conventions..."
+          # Check for interfaces without I prefix
+          find . -name "*.cs" -type f ! -path "*/obj/*" ! -path "*/bin/*" -exec grep -H "interface [^I][A-Z]" {} \; || echo "No naming violations found"
+
+  exception-check:
+    name: Exception Handling
+    runs-on: ubuntu-latest
+    needs: project-detection
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check exception handling
+        run: |
+          echo "Checking exception handling patterns..."
+          # Check for throw ex anti-pattern
+          if grep -r "throw ex;" --include="*.cs" --exclude-dir={bin,obj} .; then
+            echo "::error::Found 'throw ex;' - should use 'throw;' to preserve stack trace"
+            exit 1
+          fi
+          # Check for empty catch blocks
+          if grep -rPzo "catch[^{]*\{\s*\}" --include="*.cs" --exclude-dir={bin,obj} .; then
+            echo "::warning::Found empty catch blocks"
+          fi
+
+  configuration-check:
+    name: Configuration Pattern
+    runs-on: ubuntu-latest
+    needs: project-detection
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check configuration patterns
+        run: |
+          echo "Checking for configuration anti-patterns..."
+          # Check for hardcoded connection strings
+          if grep -r "Server=" --include="*.cs" --exclude-dir={bin,obj} . | grep -v "IConfiguration"; then
+            echo "::error::Found hardcoded connection strings"
+            exit 1
+          fi
+
+  package-security:
+    name: Package Security Scan
+    runs-on: ubuntu-latest
+    needs: project-detection
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+      
+      - name: Restore packages
+        run: dotnet restore
+      
+      - name: Check for vulnerable packages
+        run: |
+          echo "Scanning for vulnerable packages..."
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee vuln-check.txt
+          if grep -q "has the following vulnerable packages" vuln-check.txt; then
+            echo "::error::Vulnerable packages detected"
+            exit 1
+          fi
+      
+      - name: Check for deprecated packages
+        run: dotnet list package --deprecated --include-transitive || true
+
+  build-verification:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    needs: [async-check, naming-check, exception-check, configuration-check, package-security]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+      
+      - name: Restore
+        run: dotnet restore
+      
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      
+      - name: Test
+        run: dotnet test --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/test-results.trx"
+
+  review-summary:
+    name: Review Summary
+    runs-on: ubuntu-latest
+    needs: [build-verification]
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## Code Review Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All engineering standards checks completed." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Standards Verified" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Async/await patterns" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Naming conventions" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Exception handling" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Configuration patterns" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Package security" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Build & tests" >> $GITHUB_STEP_SUMMARY

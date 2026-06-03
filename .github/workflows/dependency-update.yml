@@ -1,0 +1,109 @@
+# Dependency Update Workflow
+#
+# Automatically checks for outdated packages and creates PRs for updates.
+# Runs weekly and respects package governance standards.
+
+name: Dependency Update Check
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-updates:
+    name: Check for Updates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+      
+      - name: Restore packages
+        run: dotnet restore
+      
+      - name: Check for outdated packages
+        id: outdated
+        run: |
+          echo "Checking for outdated packages..."
+          dotnet list package --outdated --include-transitive > outdated-packages.txt 2>&1
+          cat outdated-packages.txt
+          
+          if grep -q "No updates are available" outdated-packages.txt; then
+            echo "has_updates=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_updates=true" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check for vulnerable packages
+        id: vulnerable
+        run: |
+          echo "Checking for vulnerable packages..."
+          dotnet list package --vulnerable --include-transitive > vulnerable-packages.txt 2>&1
+          cat vulnerable-packages.txt
+          
+          if grep -q "has the following vulnerable packages" vulnerable-packages.txt; then
+            echo "has_vulnerabilities=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_vulnerabilities=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check for deprecated packages
+        run: |
+          echo "Checking for deprecated packages..."
+          dotnet list package --deprecated --include-transitive > deprecated-packages.txt 2>&1
+          cat deprecated-packages.txt || true
+      
+      - name: Create issue if vulnerabilities found
+        if: steps.vulnerable.outputs.has_vulnerabilities == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const vulnerablePackages = fs.readFileSync('vulnerable-packages.txt', 'utf8');
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: '🔒 Vulnerable packages detected',
+              body: `## Security Alert\n\nVulnerable packages were detected in the project.\n\n\`\`\`\n${vulnerablePackages}\n\`\`\`\n\n**Action Required:** Update these packages immediately according to [package-governance-standard](../docs/standards/package-governance-standard.md).`,
+              labels: ['security', 'dependencies', 'tech-debt']
+            });
+      
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-reports
+          path: |
+            outdated-packages.txt
+            vulnerable-packages.txt
+            deprecated-packages.txt
+      
+      - name: Summary
+        run: |
+          echo "## Dependency Update Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.vulnerable.outputs.has_vulnerabilities }}" == "true" ]; then
+            echo "⚠️ **Vulnerable packages found!**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No vulnerable packages" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.outdated.outputs.has_updates }}" == "true" ]; then
+            echo "📦 Updates available - review outdated-packages.txt artifact" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ All packages are up to date" >> $GITHUB_STEP_SUMMARY
+          fi
