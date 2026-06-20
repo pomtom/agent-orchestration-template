@@ -103,7 +103,7 @@ This document summarizes all GitHub-specific files created to complete the orche
 ├────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  Local Development Layer (.claude/)                            │
-│  ├─ Skills (10 enforcers)                                      │
+│  ├─ Skills (13 enforcers)                                      │
 │  ├─ Workflows (4 orchestrated processes)                       │
 │  ├─ Agents (architecture-reviewer, standards-auditor)          │
 │  └─ Instructions (engineering-standards, project-detection)    │
@@ -128,7 +128,7 @@ This document summarizes all GitHub-specific files created to complete the orche
 ├────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  Standards Layer (docs/standards/)                             │
-│  └─ 12 engineering standards documents                         │
+│  └─ 15 engineering standards documents                         │
 │      (Single Source of Truth for all layers)                   │
 │                                                                 │
 └────────────────────────────────────────────────────────────────┘

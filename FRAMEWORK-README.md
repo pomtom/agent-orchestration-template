@@ -50,6 +50,9 @@ Run the tech-debt-assessment workflow and give me a Now/Next/Later backlog.
 | Logging | `Enforce structured logging standards in this service.` |
 | Packages | `Audit our NuGet packages and set up central package management.` |
 | Correlation IDs | `Add X-Correlation-Id propagation to this Web API.` |
+| CQRS | `Separate reads from writes and thin out my controllers into handlers.` |
+| Repository | `Fix my data access — per-aggregate repositories and a unit-of-work commit.` |
+| Dependency injection | `Check my DI for captive dependencies and service location.` |
 | Architecture | `Do an architecture review of this solution.` |
 
 > **Review before commit.** Enforcer skills apply only mechanical, behavior-preserving
@@ -69,7 +72,7 @@ applies the same standards.
 .claude/
 ├── agents/          architecture-reviewer, standards-auditor (read-only subagents)
 ├── instructions/    engineering-standards, project-type-detection (shared context)
-├── skills/          10 capabilities (auto-invoked SKILL.md skills)
+├── skills/          13 capabilities (auto-invoked SKILL.md skills)
 └── workflows/       code-review, repo-onboarding, pre-pr-compliance, tech-debt-assessment
 .github/
 ├── copilot-instructions.md      Copilot follows the same standards
@@ -80,7 +83,7 @@ applies the same standards.
 ├── servers/         one card per MCP server (purpose, command, env, scopes)
 └── configurations/  local / ci example profiles + .env.example
 docs/
-├── standards/       ← SINGLE SOURCE OF TRUTH (12 docs incl. detection + build gate)
+├── standards/       ← SINGLE SOURCE OF TRUTH (15 docs incl. detection + build gate)
 ├── architecture/    framework-overview, extending-the-framework
 └── governance/      package-governance, security-policy, contribution-standards
 .mcp.json            live config wiring all 8 MCP servers (env-var placeholders)
@@ -100,6 +103,9 @@ docs/
 | 08 | `package-governance` | CPM; vulnerable/deprecated/outdated/unused |
 | 09 | `correlation-id-enforcer` | `X-Correlation-Id` read/generate/propagate |
 | 10 | `architecture-reviewer` | Clean Arch/SOLID/CQRS/DI/security/perf report |
+| 11 | `cqrs-pattern-enforcer` | Command/query separation; thin entry points; pipeline behaviors (library-agnostic) |
+| 12 | `repository-pattern-enforcer` | Per-aggregate repositories; unit-of-work commit; no leaky `IQueryable`/`DbContext` |
+| 13 | `dependency-injection-enforcer` | Correct lifetimes; no captive deps/service location; `IHttpClientFactory` |
 
 ## Design principle: single source of truth
 
@@ -119,7 +125,7 @@ Claude Code and Copilot follow. See
 3. **Copilot:** `.github/copilot-instructions.md` is picked up automatically in-editor.
 4. **CI:** `standards-ci.yml` is opt-in (manual dispatch). Uncomment the `push`/
    `pull_request` triggers once the repo is compliant.
-5. Open Claude Code in the repo — the 10 skills appear automatically. Run a workflow
+5. Open Claude Code in the repo — the 13 skills appear automatically. Run a workflow
    (e.g. **repo-onboarding**) to start.
 
 ## Usage

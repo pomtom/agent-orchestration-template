@@ -1,6 +1,6 @@
 ---
 name: standards-auditor
-description: Read-only compliance auditor that runs the enforcer standards (async, naming, exception handling, configuration, logging, correlation IDs, package governance) across an entire .NET solution and returns one consolidated compliance report. Use PROACTIVELY before a PR or for a full-repo standards sweep when the user wants an overall compliance picture rather than fixing one area.
+description: Read-only compliance auditor that runs the enforcer standards (async, naming, exception handling, configuration, logging, correlation IDs, package governance, CQRS, repository/unit-of-work, dependency injection) across an entire .NET solution and returns one consolidated compliance report. Use PROACTIVELY before a PR or for a full-repo standards sweep when the user wants an overall compliance picture rather than fixing one area.
 tools: Read, Grep, Glob, Bash
 model: inherit
 ---
@@ -20,7 +20,16 @@ findings; you do not modify code.
    - `docs/standards/logging-standard.md`
    - `docs/standards/correlation-id-standard.md`
    - `docs/standards/package-governance-standard.md`
+   - `docs/standards/cqrs-standard.md`
+   - `docs/standards/repository-pattern-standard.md`
+   - `docs/standards/dependency-injection-standard.md`
 3. For each standard, summarize compliance and list violations with severity.
+
+> For the pattern standards (CQRS, repository, DI), report **mechanically detectable**
+> violations with `file:line` evidence — queries that write, `IQueryable` returned from
+> repositories, `SaveChangesAsync` per method, captive dependencies, `IServiceProvider`
+> service location, `new HttpClient()`. Leave the *deep* design assessment (layering,
+> SOLID, boundaries) to the `architecture-reviewer` subagent.
 
 ## Output
 

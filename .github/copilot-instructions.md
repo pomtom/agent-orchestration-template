@@ -28,6 +28,10 @@ suggestions to the detected type.
   `Options` patterns. ([naming-standard](../docs/standards/naming-standard.md))
 - **Exception handling** — centralized middleware; meaningful domain exceptions; no empty
   catches; `throw;` not `throw ex;`; standardized `ProblemDetails` with a correlation ID.
+  Never let an exception escape unobserved: no `async void` (except event handlers), no
+  fire-and-forget `Task`, unwrap `AggregateException`, surface every faulted task in
+  `Task.WhenAll`, guard `BackgroundService.ExecuteAsync`, and rethrow
+  `OperationCanceledException` rather than swallowing cancellation.
   ([exception-handling-standard](../docs/standards/exception-handling-standard.md))
 - **Configuration** — Options Pattern with validated, strongly-typed classes; no raw
   `IConfiguration` in business code; secrets in User Secrets/Key Vault, never in source.
@@ -46,6 +50,18 @@ suggestions to the detected type.
 - **Testing** — match the existing framework; Arrange-Act-Assert;
   `Method_Scenario_ExpectedOutcome`; mock external dependencies; cover success/failure/
   edge cases. ([testing-standard](../docs/standards/testing-standard.md))
+- **CQRS / Mediator** — commands mutate, queries read (no side effects); one handler per
+  request; thin controllers/Functions/components that delegate; cross-cutting in pipeline
+  behaviors; library-agnostic (don't add MediatR where it isn't used).
+  ([cqrs-standard](../docs/standards/cqrs-standard.md))
+- **Repository & Unit of Work** — domain-meaningful per-aggregate repositories; never
+  return `IQueryable` or inject `DbContext` into handlers; one unit-of-work commit per
+  operation; no blanket generic `IRepository<T>` over EF Core.
+  ([repository-pattern-standard](../docs/standards/repository-pattern-standard.md))
+- **Dependency injection** — constructor injection (no service location); correct
+  lifetimes; no captive dependencies (singleton capturing scoped `DbContext`);
+  `IHttpClientFactory` over `new HttpClient()`; per-module registration extensions.
+  ([dependency-injection-standard](../docs/standards/dependency-injection-standard.md))
 - **Architecture** — Clean Architecture layering, SOLID, CQRS/Repository/DI done right.
   ([architecture-standard](../docs/standards/architecture-standard.md))
 

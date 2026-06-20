@@ -27,17 +27,22 @@
 - Pipeline behaviors for validation/logging/transaction where appropriate.
 - If MediatR is **not** used, assess whether the equivalent separation exists; do not
   mandate MediatR — assess the pattern, not the library.
+- *Apply/fix companion:* [cqrs-standard](./cqrs-standard.md) (`cqrs-pattern-enforcer`).
 
 ### 4. Repository / data access
 - Repositories expose domain-meaningful operations, not leaky `IQueryable` everywhere.
 - Unit of Work / transaction boundaries are clear.
 - Flag business logic embedded in repositories or EF configurations.
+- *Apply/fix companion:* [repository-pattern-standard](./repository-pattern-standard.md)
+  (`repository-pattern-enforcer`).
 
 ### 5. Dependency Injection
 - Correct lifetimes (singleton/scoped/transient); flag captive dependencies
   (singleton capturing scoped), `IServiceProvider` service-location abuse, and
   manual `new` of injectable services.
 - Registrations grouped logically (per-module extension methods).
+- *Apply/fix companion:* [dependency-injection-standard](./dependency-injection-standard.md)
+  (`dependency-injection-enforcer`).
 
 ### 6. Cross-cutting
 - Exception handling centralized ([exception-handling-standard](./exception-handling-standard.md)).

@@ -138,7 +138,9 @@ User Action
    Step 2: Fix async → 15 fixes → Build → PASS
    Step 3: Fix naming → 8 fixes → Build → PASS
    ...
-   Step 11: Final verification → BUILD PASS, TESTS PASS
+   Step 9: Design patterns (CQRS / repository / DI) → Build → PASS
+   ...
+   Step 12: Final verification → BUILD PASS, TESTS PASS
    ```
 
 3. **Enable Workflows**

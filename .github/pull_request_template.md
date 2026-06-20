@@ -24,6 +24,9 @@
 - [ ] **Configuration** — Options Pattern + validation; no raw `IConfiguration` in business code; **no secrets committed**
 - [ ] **Logging** — structured templates, correct levels, correlation scope, no PII
 - [ ] **Correlation IDs** — entry points read/generate and propagate `X-Correlation-Id`
+- [ ] **CQRS** — reads/writes separated; entry points thin; one handler per request (if applicable)
+- [ ] **Repository & UoW** — per-aggregate repositories; no leaky `IQueryable`/`DbContext`; single unit-of-work commit (if applicable)
+- [ ] **Dependency injection** — correct lifetimes; no captive dependencies/service location; `IHttpClientFactory` (if applicable)
 - [ ] **Tests** — added/updated; success, failure, and edge cases; suite passes
 - [ ] **Packages** — centrally managed; no vulnerable/deprecated additions
 - [ ] **Architecture** — respects layering/SOLID; no new circular references

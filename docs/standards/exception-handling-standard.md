@@ -52,8 +52,37 @@
 | try/catch in every method | move to centralized boundary |
 | exception messages with PII/secrets | sanitize; log detail separately |
 
+## Where exceptions get silently missed (escape hatches)
+
+A centralized handler only catches what actually reaches it. These constructs let an
+exception **bypass the boundary and disappear** — the failure mode behind "an exception
+got swallowed/missed." Hunt for each:
+
+| Escape hatch | Why it's missed | Fix |
+|---|---|---|
+| `async void` (non event-handler) | the exception is raised on the sync context with no `Task` to observe → **crashes the process / is lost**, never reaches the handler | return `async Task`; only event handlers may be `async void`, and they must `try/catch` internally |
+| Fire-and-forget `Task` (`_ = DoAsync();`, unawaited call) | a faulted `Task` nobody awaits is observed by no one; the exception is dropped | `await` it, or run it through a supervised runner that logs faults (e.g. `ContinueWith` logging on `OnlyOnFaulted`, or a tracked background job) |
+| `Task.WhenAll(...)` with a single `await` | `await` rethrows only the **first** exception; the rest are hidden on the aggregate | inspect `task.Exception` / iterate the tasks, or use the `WhenAll` result and log every faulted task's exception |
+| `AggregateException` not unwrapped | logging `ex.Message` on an aggregate shows "One or more errors occurred" and hides the real cause(s) | unwrap with `ex.Flatten().InnerExceptions` (or `ex.InnerException`) and log each |
+| `BackgroundService.ExecuteAsync` throwing | behavior depends on TFM: **pre-.NET 6** swallows it silently (the host keeps running with a dead worker); **.NET 6+** defaults to `BackgroundServiceExceptionBehavior.StopHost` (the whole host crashes) — which is sometimes downgraded back to `Ignore`. Either way the *common real bug* is a `try/catch` **inside** the loop that swallows per-iteration errors with no log | wrap the loop body in try/catch that **logs** and decides stop-vs-continue per iteration; leave the default `StopHost` for genuinely fatal startup/loop failures so they're loud, not silent |
+| `catch { }` / `catch (Exception) { /* log nothing */ }` | the exception is consumed with no record | remove, or log + handle/rethrow; never an empty body |
+| Exception thrown inside `finally` / `Dispose`/`DisposeAsync` | it **replaces/masks** the original in-flight exception | don't throw from `finally`/`Dispose`; guard cleanup with its own try/catch that logs |
+| `OperationCanceledException`/`TaskCanceledException` caught by a broad `catch (Exception)` | cancellation gets logged as an error or swallowed as a "failure" | catch and **rethrow** `OperationCanceledException` when `ct.IsCancellationRequested` (expected shutdown), separate from real errors |
+| Swallowing in event handlers / `Timer`/`ThreadPool` callbacks | no `Task`/await boundary observes them | wrap the callback body in try/catch that logs |
+| `Task` discarded in LINQ (`.Select(async x => …)` not awaited) | each produced `Task` is unobserved | materialize and `await Task.WhenAll(...)`, then check every result |
+| Return-code/`bool` swallowing of a thrown failure | the real exception is converted to a silent `false` | let domain exceptions propagate to the boundary, or return a result that carries the failure |
+
+**Rule of thumb:** every `Task` is either `await`ed, returned, or explicitly supervised
+with fault logging — never abandoned. Every `catch` either handles meaningfully, rethrows
+with `throw;`, or wraps with an inner exception — never silently. Cancellation is not a
+failure; distinguish it.
+
 ## Enforcement output
 
-- Report file:line, the anti-pattern, the fix, and severity.
+- Report file:line, the anti-pattern, the fix, and severity. Treat every **escape hatch
+  above as high severity** — these are the paths where exceptions are missed entirely.
 - Note where a centralized handler is missing for a detected host type and propose
   the appropriate middleware/wrapper.
+- Verify the centralized handler is actually reached: trace that unhandled exceptions on
+  each entry point (controller, Function trigger, worker loop) propagate to it rather than
+  being absorbed by one of the escape hatches above.

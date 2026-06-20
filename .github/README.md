@@ -246,6 +246,9 @@ Both Claude Code and GitHub workflows enforce the **same standards** from `docs/
 | Exceptions | `exception-handling-enforcer` | `exception-check` |
 | Configuration | `configuration-pattern-enforcer` | `configuration-check` |
 | Packages | `package-governance` | `package-security` |
+| CQRS / Mediator | `cqrs-pattern-enforcer` | (local only) |
+| Repository & Unit of Work | `repository-pattern-enforcer` | (local only) |
+| Dependency injection | `dependency-injection-enforcer` | (local only) |
 | Architecture | `architecture-reviewer` | (local only) |
 | Testing | `unit-test-generator` | `build-verification` |
 

@@ -29,6 +29,12 @@ the first time.
    - **`logging-enforcer`** — structured templates, levels, `CorrelationId`+`InstanceId`
      scope, no PII.
    - **`correlation-id-enforcer`** — entry points + propagation covered.
+   - **`cqrs-pattern-enforcer`** — reads/writes separated; thin entry points; one handler
+     per request (only if the diff touches handlers/controllers/endpoints).
+   - **`repository-pattern-enforcer`** — per-aggregate repositories; no leaky `IQueryable`/
+     `DbContext`; single unit-of-work commit (only if the diff touches data access).
+   - **`dependency-injection-enforcer`** — no captive dependencies/service location;
+     correct lifetimes; `IHttpClientFactory` (only if the diff touches registrations/DI).
 
 5. **Tests.** Invoke **`unit-test-generator`** for new/changed public behavior; ensure
    success/failure/edge coverage and that the suite builds and passes.

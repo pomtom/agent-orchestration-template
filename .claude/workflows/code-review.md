@@ -31,7 +31,7 @@ user to review and commit.
 - **Drive it from the main session.** Run each enforcer skill **inline** so findings,
   decisions, and edits accumulate in one continuous context. Do **not** fan every step
   out to fresh subagents — a new subagent starts cold and loses the review context.
-  (Use the read-only `architecture-reviewer` subagent only for Step 10, where a clean
+  (Use the read-only `architecture-reviewer` subagent only for Step 11, where a clean
   context is desirable and no edits are made.)
 - **Maintain a Review Ledger** (see template) and update it after every step.
 - **Build gate after every step** per
@@ -65,15 +65,30 @@ to the last known-good point, mark it *blocked* with the compiler error, and con
 7. **Correlation IDs** — `correlation-id-enforcer`: add middleware/handlers + propagation.
 8. **Packages** — `package-governance`: centralize versions, remove unused; rebuild after changes.
 
-### Step 9 — Tests
+### Step 9 — Design patterns (APPLY, then build)
+Structural pattern enforcers — run after the mechanical fixes (so the code compiles) and
+before tests (so tests target the refactored shape). Same **find → APPLY → build → ledger**
+loop; pause only for breaking changes (public endpoints, serialized contracts, public
+constructor signatures).
+
+  9a. **CQRS** — `cqrs-pattern-enforcer`: thin out entry points into handlers; separate
+      reads/writes; move cross-cutting into pipeline behaviors. Library-agnostic.
+  9b. **Repository & UoW** — `repository-pattern-enforcer`: per-aggregate repositories, no
+      leaky `IQueryable`, single unit-of-work commit; no `DbContext` in handlers.
+  9c. **Dependency injection** — `dependency-injection-enforcer`: fix captive dependencies
+      and service location, correct lifetimes, `IHttpClientFactory`, per-module registration.
+
+### Step 10 — Tests
 - **Generate and write** tests with `unit-test-generator` for new/changed public behavior,
   then **run** `dotnet test`. Treat new failures as a gate per the build standard.
 
-### Step 10 — Architecture review (read-only)
+### Step 11 — Architecture review (read-only)
 - `architecture-reviewer` skill (delegate to the `architecture-reviewer` subagent for
-  large solutions). This step **reports only** — it does not modify code.
+  large solutions). This step **reports only** — it does not modify code. It *assesses* the
+  same CQRS/repository/DI patterns the Step 9 enforcers *apply* — use it to confirm the
+  refactors landed cleanly.
 
-### Step 11 — Final verification & report
+### Step 12 — Final verification & report
 - **Run** a full solution `dotnet build` **and** `dotnet test`. The run succeeds only if
   both are green.
 - Produce the consolidated report from the ledger, describing **what was actually applied**.

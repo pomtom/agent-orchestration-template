@@ -23,7 +23,16 @@ first** — every other standard adapts to the detected project type.
 | Logging | `docs/standards/logging-standard.md` | `logging-enforcer` |
 | Package governance | `docs/standards/package-governance-standard.md` | `package-governance` |
 | Correlation IDs | `docs/standards/correlation-id-standard.md` | `correlation-id-enforcer` |
+| CQRS / Mediator | `docs/standards/cqrs-standard.md` | `cqrs-pattern-enforcer` |
+| Repository & Unit of Work | `docs/standards/repository-pattern-standard.md` | `repository-pattern-enforcer` |
+| Dependency Injection | `docs/standards/dependency-injection-standard.md` | `dependency-injection-enforcer` |
 | Architecture | `docs/standards/architecture-standard.md` | `architecture-reviewer` |
+
+> **Standards split — assess vs. apply.** The `architecture-standard` is a **read-only
+> assessment** of layering, SOLID, CQRS, repository, and DI. The pattern enforcers (`cqrs`,
+> `repository`, `dependency-injection`) are the **apply/fix** companions for those same
+> patterns. They must stay mutually consistent — the architecture standard reports, the
+> pattern standards correct.
 
 ## Operating rules
 

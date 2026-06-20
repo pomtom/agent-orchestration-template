@@ -10,11 +10,11 @@ automation only — **no business code, no new projects**.
 graph TD
     subgraph Canonical["docs/standards/ — Single Source of Truth"]
         DET[project-type-detection]
-        STD[10 standards:<br/>readme, testing, async, naming,<br/>exceptions, config, logging,<br/>packages, correlation-id, architecture]
+        STD[13 standards:<br/>readme, testing, async, naming,<br/>exceptions, config, logging,<br/>packages, correlation-id, architecture,<br/>cqrs, repository, dependency-injection]
     end
 
     subgraph Claude["Claude Code (.claude/)"]
-        SK[skills/ — 10 capabilities]
+        SK[skills/ — 13 capabilities]
         AG[agents/ — architecture-reviewer,<br/>standards-auditor]
         INS[instructions/ — shared context]
         WF[workflows/ — code-review,<br/>onboarding, pre-pr, tech-debt]
@@ -81,6 +81,9 @@ graph TD
 | Logging | `logging-enforcer` | logging-standard |
 | Packages | `package-governance` | package-governance-standard |
 | Correlation IDs | `correlation-id-enforcer` | correlation-id-standard |
+| CQRS / Mediator | `cqrs-pattern-enforcer` | cqrs-standard |
+| Repository & Unit of Work | `repository-pattern-enforcer` | repository-pattern-standard |
+| Dependency injection | `dependency-injection-enforcer` | dependency-injection-standard |
 | Architecture | `architecture-reviewer` (+ subagent) | architecture-standard |
 
 See [extending-the-framework](./extending-the-framework.md) to add a new capability.

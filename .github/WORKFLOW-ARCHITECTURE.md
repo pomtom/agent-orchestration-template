@@ -40,7 +40,7 @@ The workflow architecture implements a **defense-in-depth** strategy across mult
 **Purpose:** Primary development workflow — executed locally before commit.
 
 **Components:**
-- **Skills** (`skills/*/SKILL.md`) — 10 auto-invoked capabilities
+- **Skills** (`skills/*/SKILL.md`) — 13 auto-invoked capabilities
 - **Workflows** (`workflows/*.md`) — Orchestrated multi-step processes
 - **Agents** (`agents/`) — Read-only deep reviewers (architecture, standards)
 - **Instructions** (`instructions/`) — Shared context and detection logic
